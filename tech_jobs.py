@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from colorama import Fore, Style
 
 def scrape_remoteok_jobs(queries):
     base_url = "https://remoteok.com/remote-dev-jobs"
@@ -48,14 +49,18 @@ def scrape_remoteok_jobs(queries):
     return results
 
 def main():
-    queries = ["software developer", "content creator", "law", "legal"]
+    queries = ["software developer", "content creator", "law", "your_additional_query"]
     
     remoteok_results = scrape_remoteok_jobs(queries)
 
     if remoteok_results:
         print("Job Listings from RemoteOK:")
         for result in remoteok_results:
-            print(result)
+            print(f"{Fore.BLUE}Job Title:{Style.RESET_ALL} {result['Job Title']}")
+            print(f"{Fore.GREEN}Company:{Style.RESET_ALL} {result['Company']}")
+            print(f"{Fore.CYAN}Link:{Style.RESET_ALL} {result['Link']}")
+            print(f"{Fore.MAGENTA}Job Description:{Style.RESET_ALL} {result['Job Description']}")
+            print("\n")
     else:
         print("Failed to retrieve job listings from RemoteOK.")
 
