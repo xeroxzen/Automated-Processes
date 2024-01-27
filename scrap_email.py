@@ -6,7 +6,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 
 # Set your Gmail credentials
 email_address = 'andilembele020@gmail.com'
-credentials_file = 'path/to/credentials.json'  # You need to create a credentials file using Google Cloud Console
+credentials_file = './client_secret_643679285698-rug9n33k7ht3d6j55nkbdbplivcf09q8.apps.googleusercontent.com.json'
 
 # Set up the Gmail API scope
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
