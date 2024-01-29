@@ -39,7 +39,23 @@ for email_id in email_ids:
     sender = msg.get("From")
 
     # Process the email content as needed
-    # ...
+    if msg.is_multipart():
+        for part in msg.walk():
+            content_type = part.get_content_type()
+            content_disposition = str(part.get("Content-Disposition"))
+
+            if "attachment" in content_disposition:
+                filename = part.get_filename()
+                if filename:
+                    # Save the attachment in the current directory
+                    with open(filename, "wb") as f:
+                        f.write(part.get_payload(decode=True))
+            else:
+                # Extract the email body
+                body = part.get_payload(decode=True).decode()
+    else:
+        # Extract the email body
+        body = msg.get_payload(decode=True).decode()
 
 # Logout and close the connection
 mail.logout()
