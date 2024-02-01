@@ -4,7 +4,7 @@ from email.header import decode_header
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-# Set your Gmail credentials
+# Gmail credentials
 email_address = 'andilembele020@gmail.com'
 credentials_file = './client_secret_643679285698-rug9n33k7ht3d6j55nkbdbplivcf09q8.apps.googleusercontent.com.json'
 
@@ -15,30 +15,27 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 flow = InstalledAppFlow.from_client_secrets_file(credentials_file, SCOPES)
 credentials = flow.run_local_server(port=0)
 
-# Connect to the Gmail IMAP server
 mail = imaplib.IMAP4_SSL('imap.gmail.com')
 mail.login(email_address, credentials.token)
 
-# Select the mailbox you want to work with (e.g., 'inbox')
 mail.select('inbox')
 
-# Search for all emails
 status, messages = mail.search(None, 'ALL')
 email_ids = messages[0].split()
 
-# Fetch the emails and parse them
+# Fetch and parse emails
 for email_id in email_ids:
     _, msg_data = mail.fetch(email_id, '(RFC822)')
     raw_email = msg_data[0][1]
     msg = email.message_from_bytes(raw_email)
 
-    # Extract relevant information (e.g., subject, sender, body)
+    # Relevant information (e.g., subject, sender, body)
     subject, encoding = decode_header(msg["Subject"])[0]
     subject = subject.decode(encoding) if encoding else subject
 
     sender = msg.get("From")
-
-    # Process the email content as needed
+    print("Subject:", subject)
+    
     if msg.is_multipart():
         for part in msg.walk():
             content_type = part.get_content_type()
@@ -51,11 +48,10 @@ for email_id in email_ids:
                     with open(filename, "wb") as f:
                         f.write(part.get_payload(decode=True))
             else:
-                # Extract the email body
+                # Email body
                 body = part.get_payload(decode=True).decode()
     else:
         # Extract the email body
         body = msg.get_payload(decode=True).decode()
 
-# Logout and close the connection
 mail.logout()
