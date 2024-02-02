@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# GitHub Repo
+# GitHub Repos
 BACKEND_URL="git@github.com:QuStackZW/rent-a-room.git"
 FRONTEND_URL="git@github.com:QuStackZW/rent-a-room-client-side.git"
 
-# Check if project directory exists
+# Project directory
 if [[ ! -d "/home/andilejaden/Workspace/rent-a-room/backend" ]]; then
     echo "Project directory does not exist."
     exit 1
