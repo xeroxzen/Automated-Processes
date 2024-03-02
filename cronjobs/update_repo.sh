@@ -15,8 +15,11 @@ cd "/home/andilejaden/Workspace/rent-a-room/backend"
 # Pull latest changes
 git pull -q origin main
 
-# Update dependencies with yarn
+# Update dependencies with yarn and then restart the server
 yarn install
+yarn build
+pm2 restart rent-a-room
+
 
 # Exit with success or failure code
 if [[ $? -eq 0 ]]; then

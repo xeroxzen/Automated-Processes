@@ -5,14 +5,15 @@ from bs4 import BeautifulSoup
 from colorama import Fore, Style
 from retry import retry
 
-
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 }
 
+
 @retry(exceptions=requests.RequestException, tries=3, delay=2, backoff=2)
 def make_request(url, params=None):
     return requests.get(url, params=params, headers=headers)
+
 
 def scrape_job_board(base_url, queries):
     results = []

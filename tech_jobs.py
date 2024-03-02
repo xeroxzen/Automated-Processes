@@ -1,6 +1,21 @@
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
 from colorama import Fore, Style
+from datetime import datetime, timedelta
+import re
+
+
+def parse_relative_date(relative_date):
+    match = re.match(r'(\d+)([hd])', relative_date)
+    if match:
+        amount = int(match.group(1))
+        unit = match.group(2)
+        if unit == 'h':
+            return datetime.now() - timedelta(hours=amount)
+        elif unit == 'd':
+            return datetime.now() - timedelta(days=amount)
+    return datetime.now()
 
 
 def scrape_remoteok_jobs(queries):
@@ -31,27 +46,37 @@ def scrape_remoteok_jobs(queries):
                     "https://remoteok.com" + job.find("a", class_="preventLink")["href"]
                 )
 
-                # Fetch job description from the job details page
-                job_details_response = requests.get(link)
-                if job_details_response.status_code == 200:
-                    job_details_soup = BeautifulSoup(
-                        job_details_response.content, "html.parser"
-                    )
-                    job_description = job_details_soup.find(
-                        "div", class_="description"
-                    ).get_text(strip=True)
-                else:
-                    job_description = "Failed to retrieve job description."
+                # Check if job is listed within 7 days... #job.find("time").text.strip()
+                job_posted_date = parse_relative_date(date_posted)
+                if (datetime.today() - job_posted_date) <= timedelta(days=7):
+                    # Extract additional details from job details page
+                    job_details_response = requests.get(link)
+                    if job_details_response.status_code == 200:
+                        job_details_soup = BeautifulSoup(
+                            job_details_response.content, "html.parser"
+                        )
+                        salary = job_details_soup.find("span", class_="salary").text.strip()
+                        location = job_details_soup.find("div", class_="job-location").text.strip()
+                        key_responsibilities = [
+                            li.text.strip()
+                            for li in job_details_soup.find_all("li", class_="responsibility")
+                        ]
+                    else:
+                        salary = "Not available"
+                        location = "Not available"
+                        key_responsibilities = ["Failed to retrieve key responsibilities"]
 
-                result = {
-                    "Job Title": job_title,
-                    "Company": company,
-                    "Link": link,
-                    "Date Posted": date_posted,
-                    "Job Description": job_description,
-                }
+                    result = {
+                        "Job Title": job_title,
+                        "Company": company,
+                        "Link": link,
+                        "Date Posted": date_posted,
+                        "Salary": salary,
+                        "Location": location,
+                        "Key Responsibilities": key_responsibilities,
+                    }
 
-                results.append(result)
+                    results.append(result)
         else:
             print(
                 f"Failed to retrieve data for query '{query}'. Status code: {response.status_code}"
@@ -64,8 +89,7 @@ def main():
     queries = [
         "software developer",
         "content creator",
-        "law",
-        "softwaare engineer",
+        "software engineer",
         "data scientist",
         "data analyst",
         "data engineer",
@@ -83,13 +107,14 @@ def main():
             print(f"{Fore.GREEN}Company:{Style.RESET_ALL} {result['Company']}")
             print(f"{Fore.CYAN}Link:{Style.RESET_ALL} {result['Link']}")
             print(f"{Fore.YELLOW}Date Posted:{Style.RESET_ALL} {result['Date Posted']}")
-            print(
-                f"{Fore.MAGENTA}Job Description:{Style.RESET_ALL} {result['Job Description']}"
-            )
+            print(f"{Fore.RED}Salary:{Style.RESET_ALL} {result['Salary']}")
+            print(f"{Fore.WHITE}Location:{Style.RESET_ALL} {result['Location']}")
+            print(f"{Fore.GREEN}Key Responsibilities:")
+            for responsibility in result["Key Responsibilities"]:
+                print(f"\t- {responsibility}")
             print("\n")
     else:
-        print("Failed to retrieve job listings from RemoteOK.")
-
-
+        print("Failed to retrieve job")
+        
 if __name__ == "__main__":
     main()
